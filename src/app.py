@@ -128,7 +128,7 @@ def load_from_file(path):
         with open(path, 'r') as file:
             for line in file.readlines():
                 # Check if empty - bail/stop/valdiate as early as possible
-                if line == '':
+                if not line:
                     continue
                 # Trim newline/whitespace
                 # Add to data
