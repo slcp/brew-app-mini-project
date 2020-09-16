@@ -13,28 +13,6 @@ SET_FAVOURITE_ARG = 5
 VIEW_FAVOURITES_ARG = 6
 EXIT_ARG = 7
 
-# Menu config
-menu_config = [
-    {'menu_option': 1, 'menu_text': 'Get all people'},
-    {'menu_option': 2, 'menu_text': 'Get all drinks'},
-    {'menu_option': 3, 'menu_text': 'Add a person'},
-    {'menu_option': 4, 'menu_text': 'Add a drink'},
-    {'menu_option': 5, 'menu_text': 'Set a favourite drink'},
-    {'menu_option': 6, 'menu_text': 'View favourites'},
-    {'menu_option': 7, 'menu_text': 'Exit'},
-]
-
-# CLI menu
-def make_menu(config):
-    new_line = "\n"
-    return f'''
-Welcome to {APP_NAME} v{VERSION}!
-Please, select an option by entering a number:
-
-{new_line.join([f'[{item.get("menu_option")}] {item.get("menu_text")}' for item in config])}
-'''
-
-MENU_TEXT = make_menu(menu_config)
 
 # App data
 drinks = []
@@ -122,14 +100,6 @@ def wait():
 # Output helper funcs
 def output(text):
     print(f'\n{text}')
-
-
-def handle_get_people():
-    print_table('people', people)
-
-
-def handle_get_drinks():
-    print_table('drinks', drinks)
 
 
 def print_menu(title, data):
@@ -223,6 +193,81 @@ def save_favourites(data):
     save_to_file(FAVOURITES_FILE_PATH, items)
 
 
+# Menu handlers
+def handle_exit():
+    print('Saving data...')
+    save_to_file(DRINKS_FILE_PATH, drinks)
+    save_to_file(PEOPLE_FILE_PATH, people)
+    save_favourites(favourite_drinks)
+    print(f'Thank you for using {APP_NAME}')
+    exit()
+
+
+def handle_add_person():
+    name = get_raw_input("What is the name of the user?")
+    if name not in people:
+        people.append(name)
+
+
+def handle_add_drink():
+    drink = get_raw_input("What is the name of the drink?")
+    if drink not in drinks:
+        drinks.append(drink)
+
+
+def handle_get_people():
+    print_table('people', people)
+
+
+def handle_get_drinks():
+    print_table('drinks', drinks)
+
+
+def handle_set_favourite_drink():
+    person = select_from_menu('Choose a person', people)
+    if not person:
+        wait()
+        run_menu()
+
+    drink = select_from_menu(f'Choose a drink for {person}', drinks)
+    if not drink:
+        wait()
+        run_menu()
+
+    favourite_drinks[person] = drink
+    print(f"\nThank you - {person}'s favourite drink is now {drink}")
+
+
+def handle_view_favourites():
+    print_favourites(favourite_drinks)
+
+
+# Menu config
+menu_config = [
+    {'menu_option': 1, 'menu_text': 'Get all people', 'handler': handle_get_people},
+    {'menu_option': 2, 'menu_text': 'Get all drinks', 'handler': handle_get_drinks},
+    {'menu_option': 3, 'menu_text': 'Add a person', 'handler': handle_add_person},
+    {'menu_option': 4, 'menu_text': 'Add a drink', 'handler': handle_add_drink},
+    {'menu_option': 5, 'menu_text': 'Set a favourite drink',
+        'handler': handle_set_favourite_drink},
+    {'menu_option': 6, 'menu_text': 'View favourites',
+        'handler': handle_view_favourites},
+    {'menu_option': 7, 'menu_text': 'Exit', 'handler': handle_exit},
+]
+
+# CLI menu
+def make_menu(config):
+    new_line = "\n"
+    return f'''
+Welcome to {APP_NAME} v{VERSION}!
+Please, select an option by entering a number:
+
+{new_line.join([f'[{item.get("menu_option")}] {item.get("menu_text")}' for item in config])}
+'''
+
+
+MENU_TEXT = make_menu(menu_config)
+
 # App
 def run_menu():
     print_main_menu()
@@ -231,57 +276,25 @@ def run_menu():
         wait()
         run_menu()
 
-    # Handle command
-    if option == GET_DRINKS_ARG:
-        handle_get_drinks()
-        wait()
-        run_menu()
-    elif option == GET_PEOPLE_ARG:
-        handle_get_people()
-        wait()
-        run_menu()
-    elif option == EXIT_ARG:
-        print('Saving data...')
-        save_to_file(DRINKS_FILE_PATH, drinks)
-        save_to_file(PEOPLE_FILE_PATH, people)
-        save_favourites(favourite_drinks)
-        print(f'Thank you for using {APP_NAME}')
-        exit()
-    elif option == ADD_PERSON_ARG:
-        name = get_raw_input("What is the name of the user?")
-        if name not in people:
-            people.append(name)
-        wait()
-        run_menu()
-    elif option == ADD_DRINK_ARG:
-        drink = get_raw_input("What is the name of the drink?")
-        if drink not in drinks:
-            drinks.append(drink)
-        wait()
-        run_menu()
-    elif option == SET_FAVOURITE_ARG:
-        person = select_from_menu('Choose a person', people)
-        if not person:
-            wait()
-            run_menu()
+    # Find item in menu_config that matches input
+    #
+    # (item for item in menu_config if item.get('menu_option') == option) list comprehension
+    # to create a list all menu_config items that match user inputted option - there should only be one
+    #
+    # next(list, default_value) - get the next/first item in the list, or None if it is empty
+    option_config = next(
+        (item for item in menu_config if item.get('menu_option') == option), None)
 
-        drink = select_from_menu(f'Choose a drink for {person}', drinks)
-        if not drink:
-            wait()
-            run_menu()
-
-        favourite_drinks[person] = drink
-        print(f"\nThank you - {person}'s favourite drink is now {drink}")
-        wait()
-        run_menu()
-    elif option == VIEW_FAVOURITES_ARG:
-        print_favourites(favourite_drinks)
-        wait()
-        run_menu()
-    else:
+    # Handle unknown args
+    if option_config is None:
         output(f'"{option}"" is not an option that I recognise')
         wait()
         run_menu()
+
+    # Invoke handler
+    option_config.get('handler')()
+    wait()
+    run_menu()
 
 
 def start():
@@ -289,7 +302,7 @@ def start():
     run_menu()
 
 
-# When this file is run from terminal/cli  as a module __name__ is set to "__main__" 
+# When this file is run from terminal/cli  as a module __name__ is set to "__main__"
 # eg. python -m src.app
 # When the file is imported (eg. import app) __name__ is NOT set to "__main__"
 #
