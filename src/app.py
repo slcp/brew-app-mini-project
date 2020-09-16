@@ -2,48 +2,14 @@ import os
 
 from src.constants import DRINKS_FILE_PATH, PEOPLE_FILE_PATH, FAVOURITES_FILE_PATH
 from src.constants import APP_NAME, VERSION
+from src.core.table import print_table
+from src.data_store.files import read_lines
 
 # Define data
 # App data
 drinks = []
 people = []
 favourite_drinks = {}
-
-
-# Table output helper funcs
-def get_table_width(title, data):
-    longest = len(title)
-    additional_spacing = 2
-    for item in data:
-        if len(item) > longest:
-            longest = len(item)
-    return longest + additional_spacing
-
-
-def print_table_body(contents):
-    for item in contents:
-        print(f'| {item}')
-
-
-def print_divider(length):
-    print(f'+{"=" * length}+')
-
-
-def print_table_header(title, width):
-    print_divider(width)
-    print(f'| {title.upper()}')
-    print_divider(width)
-
-
-def print_table_footer(width):
-    print_divider(width)
-
-
-def print_table(title, contents):
-    width = get_table_width(title, contents)
-    print_table_header(title, width)
-    print_table_body(contents)
-    print_table_footer(width)
 
 
 def clear_screen():
@@ -122,26 +88,8 @@ def exit_with_error(e, msg=None):
     exit()
 
 
-def load_from_file(path):
-    data = []
-    try:
-        with open(path, 'r') as file:
-            for line in file.readlines():
-                # Check if empty - bail/stop/valdiate as early as possible
-                if not line:
-                    continue
-                # Trim newline/whitespace
-                # Add to data
-                data.append(line.strip())
-    except FileNotFoundError as e:
-        exit_with_error(e, f'File "{path}" cannot be found')
-    except Exception as e:
-        exit_with_error(e, f'Unable to open file "{path}"')
-    return data
-
-
 def load_favourites(people, drinks):
-    for item in load_from_file(FAVOURITES_FILE_PATH):
+    for item in read_lines(FAVOURITES_FILE_PATH):
         # Unpacking the items in the list to separate variables
         # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
         # I know items.split will return a list with two items, because of the second argument
@@ -159,9 +107,9 @@ def load_favourites(people, drinks):
 
 
 def load_data():
-    for person in load_from_file(PEOPLE_FILE_PATH):
+    for person in read_lines(PEOPLE_FILE_PATH):
         people.append(person)
-    for drink in load_from_file(DRINKS_FILE_PATH):
+    for drink in read_lines(DRINKS_FILE_PATH):
         drinks.append(drink)
     load_favourites(people, drinks)
 
@@ -252,6 +200,8 @@ menu_config = [
 ]
 
 # CLI menu
+
+
 def make_menu(config):
     new_line = "\n"
     return f'''
@@ -265,6 +215,8 @@ Please, select an option by entering a number:
 MENU_TEXT = make_menu(menu_config)
 
 # App
+
+
 def run_menu():
     print_main_menu()
     option = get_menu_input('Enter your selection:')
