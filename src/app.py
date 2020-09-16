@@ -1,5 +1,8 @@
 import os
 
+from src.constants import DRINKS_FILE_PATH, PEOPLE_FILE_PATH, FAVOURITES_FILE_PATH
+from src.constants import APP_NAME, VERSION
+
 # Define data
 # Menu options
 GET_PEOPLE_ARG = 1
@@ -10,26 +13,30 @@ SET_FAVOURITE_ARG = 5
 VIEW_FAVOURITES_ARG = 6
 EXIT_ARG = 7
 
+# Menu config
+menu_config = [
+    {'menu_option': 1, 'menu_text': 'Get all people'},
+    {'menu_option': 2, 'menu_text': 'Get all drinks'},
+    {'menu_option': 3, 'menu_text': 'Add a person'},
+    {'menu_option': 4, 'menu_text': 'Add a drink'},
+    {'menu_option': 5, 'menu_text': 'Set a favourite drink'},
+    {'menu_option': 6, 'menu_text': 'View favourites'},
+    {'menu_option': 7, 'menu_text': 'Exit'},
+]
+
 # CLI menu
-APP_NAME = 'BrIW'
-VERSION = '0.1'
-MENU_TEXT = f'''
+def make_menu(config):
+    new_line = "\n"
+    return f'''
 Welcome to {APP_NAME} v{VERSION}!
 Please, select an option by entering a number:
 
-[1] Get all people
-[2] Get all drinks
-[3] Add a person
-[4] Add a drink
-[5] Set a favourite drink
-[6] View favourites
-[7] Exit
+{new_line.join([f'[{item.get("menu_option")}] {item.get("menu_text")}' for item in config])}
 '''
 
+MENU_TEXT = make_menu(menu_config)
+
 # App data
-DRINKS_FILE_PATH = './data/drinks.txt'
-PEOPLE_FILE_PATH = './data/people.txt'
-FAVOURITES_FILE_PATH = './data/favourites.txt'
 drinks = []
 people = []
 favourite_drinks = {}
@@ -117,11 +124,11 @@ def output(text):
     print(f'\n{text}')
 
 
-def print_people():
+def handle_get_people():
     print_table('people', people)
 
 
-def print_drinks():
+def handle_get_drinks():
     print_table('drinks', drinks)
 
 
@@ -226,11 +233,11 @@ def run_menu():
 
     # Handle command
     if option == GET_DRINKS_ARG:
-        print_drinks()
+        handle_get_drinks()
         wait()
         run_menu()
     elif option == GET_PEOPLE_ARG:
-        print_people()
+        handle_get_people()
         wait()
         run_menu()
     elif option == EXIT_ARG:
@@ -282,5 +289,10 @@ def start():
     run_menu()
 
 
-# Entry point
-start()
+# When this file is run from terminal/cli  as a module __name__ is set to "__main__" 
+# eg. python -m src.app
+# When the file is imported (eg. import app) __name__ is NOT set to "__main__"
+#
+# Great resource explaining Python modules/packages - https://alex.dzyoba.com/blog/python-import/
+if __name__ == "__main__":
+    start()
