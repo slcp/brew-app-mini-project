@@ -27,8 +27,11 @@ Please, select an option by entering a number:
 '''
 
 # App data
-drinks = ['Tea', 'Coffee', 'Mocha', 'Cortado']
-people = ['Malik', 'Katie', 'Taishan', 'Suman']
+DRINKS_FILE_PATH = './data/drinks.txt'
+PEOPLE_FILE_PATH = './data/people.txt'
+FAVOURITES_FILE_PATH = './data/favourites.txt'
+drinks = []
+people = []
 favourite_drinks = {}
 
 
@@ -96,15 +99,13 @@ def validate_menu_input(index, data):
         print(f'"{index}" is not a valid option from that menu\n')
         wait()
         return False
-    return True
+    return data[index]
 
 
 def select_from_menu(message, data):
     print_menu(message, data)
-    index = get_menu_input('Enter your selection:')
-    if not validate_menu_input(index, data):
-        return False
-    return data[index]
+    selection = get_menu_input(f'{message} ')
+    return validate_menu_input(selection, data)
 
 
 def wait():
@@ -126,7 +127,11 @@ def print_drinks():
 
 def print_menu(title, data):
     items = []
-    for i, item in enumerate(data, start=1):
+    # enumerate() will produce the index/position in the list and the item in
+    # the list for use within your loop. If you are not interested in knowing
+    # what position you are at in the list then you wouldn't want to use
+    # enumerate()
+    for i, item in enumerate(data):
         items.append(f'[{i}] {item}')
     clear_screen()
     print(f'{title}\n')
@@ -140,23 +145,99 @@ def print_favourites(data):
     print_table('Favourites', items)
 
 
-# Entry point
-while True:
+# Data persistence helper funcs
+def exit_with_error(e, msg=None):
+    msg = msg if msg else 'Something went wrong'
+    print(f'{msg} with error: {str(e)} - exiting')
+    exit()
+
+
+def load_from_file(path):
+    data = []
+    try:
+        with open(path, 'r') as file:
+            for line in file.readlines():
+                # Check if empty - bail/stop/valdiate as early as possible
+                if line == '':
+                    continue
+                # Trim newline/whitespace
+                # Add to data
+                data.append(line.strip())
+    except FileNotFoundError as e:
+        exit_with_error(e, f'File "{path}" cannot be found')
+    except Exception as e:
+        exit_with_error(e, f'Unable to open file "{path}"')
+    return data
+
+
+def load_favourites(people, drinks):
+    for item in load_from_file(FAVOURITES_FILE_PATH):
+        # Unpacking the items in the list to separate variables
+        # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
+        # I know items.split will return a list with two items, because of the second argument
+        # it will only split once even if there are more instances of ':' in the string
+        name, drink = item.split(":", 1)
+        if name in people and drink in drinks:
+            favourite_drinks[name] = drink
+        else:
+            print('Unexpected data returned when loading favourites.')
+            print(f'Drink is known: {drink in drinks}')
+            print(f'Name is known: {name in people}')
+
+
+def load_data():
+    for person in load_from_file(PEOPLE_FILE_PATH):
+        people.append(person)
+    for drink in load_from_file(DRINKS_FILE_PATH):
+        drinks.append(drink)
+    load_favourites(people, drinks)
+
+
+def save_to_file(path, data):
+    try:
+        with open(path, 'w') as file:
+            # List comprehension - make a new list from an list
+            # https://www.pythonforbeginners.com/basics/list-comprehensions-in-python
+            # There are other ways to this but list comprehension
+            # is an idiomatic use of python
+            file.writelines([f'{item}\n' for item in data])
+    except FileNotFoundError as e:
+        exit_with_error(e, f'File "{path}" cannot be found')
+    except Exception as e:
+        exit_with_error(e, f'Unable to open file "{path}"')
+
+
+def save_favourites(data):
+    items = []
+    for item in data.items():
+        name, drink = item
+        # Defining a consistent structure here so that I can parse/recognise it when loading
+        items.append(f'{name}:{drink}')
+    save_to_file(FAVOURITES_FILE_PATH, items)
+
+
+# App
+def run_menu():
     print_main_menu()
     option = get_menu_input('Enter your selection:')
-    # There is no 0 menu option so this works, not ideal
     if not option:
         wait()
-        continue
+        run_menu()
 
     # Handle command
     if option == GET_DRINKS_ARG:
         print_drinks()
         wait()
+        run_menu()
     elif option == GET_PEOPLE_ARG:
         print_people()
         wait()
+        run_menu()
     elif option == EXIT_ARG:
+        print('Saving data...')
+        save_to_file(DRINKS_FILE_PATH, drinks)
+        save_to_file(PEOPLE_FILE_PATH, people)
+        save_favourites(favourite_drinks)
         print(f'Thank you for using {APP_NAME}')
         exit()
     elif option == ADD_PERSON_ARG:
@@ -164,27 +245,42 @@ while True:
         if name not in people:
             people.append(name)
         wait()
+        run_menu()
     elif option == ADD_DRINK_ARG:
         drink = get_raw_input("What is the name of the drink?")
         if drink not in drinks:
             drinks.append(drink)
         wait()
+        run_menu()
     elif option == SET_FAVOURITE_ARG:
         person = select_from_menu('Choose a person', people)
         if not person:
-            output(f'{person} is mo')
             wait()
+            run_menu()
 
         drink = select_from_menu(f'Choose a drink for {person}', drinks)
         if not drink:
             wait()
+            run_menu()
 
         favourite_drinks[person] = drink
         print(f"\nThank you - {person}'s favourite drink is now {drink}")
         wait()
+        run_menu()
     elif option == VIEW_FAVOURITES_ARG:
         print_favourites(favourite_drinks)
         wait()
+        run_menu()
     else:
         output(f'"{option}"" is not an option that I recognise')
         wait()
+        run_menu()
+
+
+def start():
+    load_data()
+    run_menu()
+
+
+# Entry point
+start()
