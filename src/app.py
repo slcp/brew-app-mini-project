@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 from src.constants import DRINKS_FILE_PATH, PEOPLE_FILE_PATH, FAVOURITES_FILE_PATH
 from src.constants import APP_NAME, VERSION
 from src.core.table import print_table
-from src.data_store.files import read_lines
+from src.data_store.files import read_lines, save_lines
 
 # Define data
 # App data
@@ -16,13 +17,8 @@ def clear_screen():
     os.system('clear')
 
 
-def print_main_menu():
-    clear_screen()
-    print(MENU_TEXT)
-
-
 # Input helper funcs
-def get_menu_input(message):
+def get_numeric_menu_input(message: str):
     try:
         return int(input(f'{message} '))
     except ValueError:
@@ -31,11 +27,7 @@ def get_menu_input(message):
         return False
 
 
-def get_raw_input(message):
-    return input(f'{message} ')
-
-
-def validate_menu_input(index, data):
+def validate_menu_input(index: int, data: list):
     if index < 0 or index >= len(data):
         print(f'"{index}" is not a valid option from that menu\n')
         wait()
@@ -43,9 +35,9 @@ def validate_menu_input(index, data):
     return data[index]
 
 
-def select_from_menu(message, data):
+def select_from_menu(message: str, data: list):
     print_menu(message, data)
-    selection = get_menu_input(f'{message} ')
+    selection = get_numeric_menu_input(f'{message} ')
     return validate_menu_input(selection, data)
 
 
@@ -54,11 +46,11 @@ def wait():
 
 
 # Output helper funcs
-def output(text):
+def output(text: str):
     print(f'\n{text}')
 
 
-def print_menu(title, data):
+def print_menu(title: str, data: list):
     items = []
     # enumerate() will produce the index/position in the list and the item in
     # the list for use within your loop. If you are not interested in knowing
@@ -74,21 +66,15 @@ def print_menu(title, data):
     print('\n'.join(items), '\n')
 
 
-def print_favourites(data):
+def print_favourites(favourites: dict):
     items = []
-    for name, drink in data.items():
+    for name, drink in favourites.items():
         items.append(f'{name}: {drink}')
     print_table('Favourites', items)
 
 
 # Data persistence helper funcs
-def exit_with_error(e, msg=None):
-    msg = msg if msg else 'Something went wrong'
-    print(f'{msg} with error: {str(e)} - exiting')
-    exit()
-
-
-def load_favourites(people, drinks):
+def load_favourites(people: list, drinks: list):
     for item in read_lines(FAVOURITES_FILE_PATH):
         # Unpacking the items in the list to separate variables
         # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
@@ -102,8 +88,8 @@ def load_favourites(people, drinks):
             favourite_drinks[name] = drink
         else:
             print('Unexpected data returned when loading favourites.')
-            print(f'Drink is known: {drink in drinks}')
-            print(f'Name is known: {name in people}')
+            print(f'Drink is not known: {drink in drinks}')
+            print(f'Name is not known: {name in people}')
 
 
 def load_data():
@@ -114,47 +100,33 @@ def load_data():
     load_favourites(people, drinks)
 
 
-def save_to_file(path, data):
-    try:
-        with open(path, 'w') as file:
-            # List comprehension - make a new list from an list
-            # https://www.pythonforbeginners.com/basics/list-comprehensions-in-python
-            # There are other ways to this but list comprehension
-            # is an idiomatic use of python
-            file.writelines([f'{item}\n' for item in data])
-    except FileNotFoundError as e:
-        exit_with_error(e, f'File "{path}" cannot be found')
-    except Exception as e:
-        exit_with_error(e, f'Unable to open file "{path}"')
-
-
-def save_favourites(data):
+def save_favourites(favourites: dict):
     items = []
-    for item in data.items():
+    for item in favourites.items():
         name, drink = item
         # Defining a consistent structure here so that I can parse/recognise it when loading
         items.append(f'{name}:{drink}')
-    save_to_file(FAVOURITES_FILE_PATH, items)
+    save_lines(FAVOURITES_FILE_PATH, items)
 
 
 # Menu handlers
 def handle_exit():
     print('Saving data...')
-    save_to_file(DRINKS_FILE_PATH, drinks)
-    save_to_file(PEOPLE_FILE_PATH, people)
+    save_lines(DRINKS_FILE_PATH, drinks)
+    save_lines(PEOPLE_FILE_PATH, people)
     save_favourites(favourite_drinks)
     print(f'Thank you for using {APP_NAME}')
     exit()
 
 
 def handle_add_person():
-    name = get_raw_input("What is the name of the user?")
+    name = input("What is the name of the user? ")
     if name not in people:
         people.append(name)
 
 
 def handle_add_drink():
-    drink = get_raw_input("What is the name of the drink?")
+    drink = input("What is the name of the drink? ")
     if drink not in drinks:
         drinks.append(drink)
 
@@ -199,10 +171,9 @@ menu_config = [
     {'menu_option': 7, 'menu_text': 'Exit', 'handler': handle_exit},
 ]
 
+
 # CLI menu
-
-
-def make_menu(config):
+def make_menu(config: List[dict]):
     new_line = "\n"
     return f'''
 Welcome to {APP_NAME} v{VERSION}!
@@ -214,38 +185,42 @@ Please, select an option by entering a number:
 
 MENU_TEXT = make_menu(menu_config)
 
+
 # App
-
-
 def run_menu():
-    print_main_menu()
-    option = get_menu_input('Enter your selection:')
-    if not option:
+    # Enter an infinite loop - the exit option calls exit() which will kill the program
+    while True:
+        clear_screen()
+        print(MENU_TEXT)
+
+        # Ask the user to choose an item from the menu - we want a number
+        option = get_numeric_menu_input('Enter your selection:')
+        if not option:
+            wait()
+            continue
+
+        # Find item in menu_config that matches input
+        #
+        # (item for item in menu_config if item.get('menu_option') == option) list comprehension
+        # to create a list all menu_config items that match user inputted option - there should only be one
+        #
+        # next(list, default_value) - get the next/first item in the list, or None if it is empty
+        #
+        # https: // www.programiz.com/python-programming/methods/built-in/next
+        # https://docs.python.org/3/library/functions.html#next
+        option_config = next(
+            (item for item in menu_config if item.get('menu_option') == option), None)
+
+        # Handle unknown args
+        if option_config is None:
+            output(f'"{option}"" is not an option that I recognise')
+            wait()
+            continue
+
+        # Invoke handler
+        option_config.get('handler')()
         wait()
-        run_menu()
-
-    # Find item in menu_config that matches input
-    #
-    # (item for item in menu_config if item.get('menu_option') == option) list comprehension
-    # to create a list all menu_config items that match user inputted option - there should only be one
-    #
-    # next(list, default_value) - get the next/first item in the list, or None if it is empty
-    #
-    # https: // www.programiz.com/python-programming/methods/built-in/next
-    # https://docs.python.org/3/library/functions.html#next
-    option_config = next(
-        (item for item in menu_config if item.get('menu_option') == option), None)
-
-    # Handle unknown args
-    if option_config is None:
-        output(f'"{option}"" is not an option that I recognise')
-        wait()
-        run_menu()
-
-    # Invoke handler
-    option_config.get('handler')()
-    wait()
-    run_menu()
+        continue
 
 
 def start():
