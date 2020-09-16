@@ -1,0 +1,10 @@
+.vscode
+
+# venv
+bin
+include
+lib
+lib64
+
+# python
+__pycache__
