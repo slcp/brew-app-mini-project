@@ -98,6 +98,9 @@ def print_menu(title, data):
     # the list for use within your loop. If you are not interested in knowing
     # what position you are at in the list then you wouldn't want to use
     # enumerate()
+    #
+    # https://www.programiz.com/python-programming/methods/built-in/enumerate
+    # https://docs.python.org/3/library/functions.html#enumerate
     for i, item in enumerate(data):
         items.append(f'[{i}] {item}')
     clear_screen()
@@ -143,6 +146,9 @@ def load_favourites(people, drinks):
         # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
         # I know items.split will return a list with two items, because of the second argument
         # it will only split once even if there are more instances of ':' in the string
+        #
+        # https://www.programiz.com/python-programming/methods/string/split
+        # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
         name, drink = item.split(":", 1)
         if name in people and drink in drinks:
             favourite_drinks[name] = drink
@@ -272,6 +278,9 @@ def run_menu():
     # to create a list all menu_config items that match user inputted option - there should only be one
     #
     # next(list, default_value) - get the next/first item in the list, or None if it is empty
+    #
+    # https: // www.programiz.com/python-programming/methods/built-in/next
+    # https://docs.python.org/3/library/functions.html#next
     option_config = next(
         (item for item in menu_config if item.get('menu_option') == option), None)
 
