@@ -4,16 +4,6 @@ from src.constants import DRINKS_FILE_PATH, PEOPLE_FILE_PATH, FAVOURITES_FILE_PA
 from src.constants import APP_NAME, VERSION
 
 # Define data
-# Menu options
-GET_PEOPLE_ARG = 1
-GET_DRINKS_ARG = 2
-ADD_PERSON_ARG = 3
-ADD_DRINK_ARG = 4
-SET_FAVOURITE_ARG = 5
-VIEW_FAVOURITES_ARG = 6
-EXIT_ARG = 7
-
-
 # App data
 drinks = []
 people = []
