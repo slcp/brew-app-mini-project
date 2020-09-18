@@ -1,10 +1,11 @@
 import os
 from typing import List
 
-from src.constants import APP_NAME, VERSION
+from src.constants import APP_NAME, VERSION, DRNIKS_MENU_USUAL_OPTION
 from src.core.table import print_table
-from src.core.main import load_data, save_data, clear_screen
-from src.core.menu import select_from_menu, get_numeric_menu_input
+from src.core.main import load_data, save_data, build_round
+from src.core.menu import clear_screen, select_from_menu, get_numeric_menu_input
+from src.models.round import Round
 
 # Define data
 # App data
@@ -48,12 +49,12 @@ def handle_get_drinks():
 
 def handle_set_favourite_drink():
     person = select_from_menu('Choose a person', people)
-    if not person:
+    if person is False:
         wait()
         run_menu()
 
     drink = select_from_menu(f'Choose a drink for {person}', drinks)
-    if not drink:
+    if drink is False:
         wait()
         run_menu()
 
@@ -69,6 +70,21 @@ def handle_view_favourites():
                 f'{name}: {drink}' for name, drink in favourite_drinks.items()])
 
 
+def handle_start_round():
+    # Whose round is it?
+    name = select_from_menu('Whose round is this?', people)
+    if name is False:
+        print("Please choose a number from the menu")
+        handle_start_round()
+
+    # Create round with owner, get user input to add drinks to the round
+    round = build_round(Round(name), favourite_drinks, people, drinks)
+
+    clear_screen()
+    print(f'Time for you to make some drinks {name}\n')
+    round.print_order()
+
+
 # Menu config
 menu_config = [
     {'menu_option': 1, 'menu_text': 'Get all people', 'handler': handle_get_people},
@@ -79,7 +95,8 @@ menu_config = [
         'handler': handle_set_favourite_drink},
     {'menu_option': 6, 'menu_text': 'View favourites',
         'handler': handle_view_favourites},
-    {'menu_option': 7, 'menu_text': 'Exit', 'handler': handle_exit},
+    {'menu_option': 7, 'menu_text': 'Start a round', 'handler': handle_start_round},
+    {'menu_option': 8, 'menu_text': 'Exit', 'handler': handle_exit},
 ]
 
 

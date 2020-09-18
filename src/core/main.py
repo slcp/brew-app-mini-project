@@ -1,11 +1,17 @@
 import os
+from typing import Dict, List
 
-from src.constants import DRINKS_FILE_PATH, PEOPLE_FILE_PATH, FAVOURITES_FILE_PATH
+from src.constants import (
+    DRINKS_FILE_PATH,
+    PEOPLE_FILE_PATH,
+    FAVOURITES_FILE_PATH,
+    DRNIKS_MENU_USUAL_OPTION
+)
 from src.data_store.files import read_lines, save_lines
+from src.models.round import Round
+from src.core.menu import select_from_menu, clear_screen
+from src.core.table import print_table
 
-
-def clear_screen():
-    os.system('clear')
 
 def load_data(people: list, drinks: list, favourites: dict):
     # Load people
@@ -42,3 +48,45 @@ def save_data(people: list, drinks: list, favourites: dict):
     # f'{name}:{drink}'
     save_lines(FAVOURITES_FILE_PATH, [
                f'{name}:{drink}' for name, drink in favourites.items()])
+
+
+def get_available_drinks_for_round(favourites, drinks, name):
+    if name in favourites.keys():
+        return drinks + [DRNIKS_MENU_USUAL_OPTION]
+    else:
+        return drinks
+
+
+def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[str]):
+    while True:
+        clear_screen()
+        round.print_order()
+        # Set name, drink and finish to the same value, None
+        name = drink = finish = None
+        while not name:
+            name = select_from_menu('\nWhose drink would like to set?', people, clear=False)
+            if name is False:
+                print("Please choose a number from the menu")
+
+        # If the person has a stored favourite drink add an option to the drinks menu
+        available_drinks = get_available_drinks_for_round(favourites, drinks, name)
+
+        while not drink:
+            drink = select_from_menu(
+                f'Please choose a drink for {name}', available_drinks)
+            if drink is False:
+                print("Please choose a number from the menu")
+
+        if drink == DRNIKS_MENU_USUAL_OPTION:
+            drink = favourites[name]
+        round.add_to_round(favourites, name, drink=drink)
+        clear_screen()
+
+        # Ask to add another order with end round option
+        while not finish:
+            round.print_order()
+            finish = select_from_menu('\nDo you want to add another drink?', ['Yes', 'No'], clear=False)
+            if finish is False:
+                print("Please choose a number from the menu")
+            if finish == "No":
+                return round
