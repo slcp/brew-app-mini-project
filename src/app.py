@@ -53,13 +53,11 @@ def handle_get_drinks():
 def handle_set_favourite_drink():
     person = select_person_from_menu(people, 'Choose a person')
     if not person:
-        wait()
-        run_menu()
+        return
 
     index = select_from_menu(f'Choose a drink for {person.name}', drinks)
     if index is False:
-        wait()
-        run_menu()
+        return
     drink = drinks[index]
 
     favourite_drinks[person.name] = drink
