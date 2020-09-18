@@ -9,14 +9,16 @@ from src.constants import (
 )
 from src.data_store.files import read_lines, save_lines
 from src.models.round import Round
+from src.models.person import Person
 from src.core.menu import select_from_menu, clear_screen
 from src.core.table import print_table
+from src.core.input import select_person_from_menu
 
 
 def load_data(people: list, drinks: list, favourites: dict):
     # Load people
     for person in read_lines(PEOPLE_FILE_PATH):
-        people.append(person)
+        people.append(Person(person))
     # Load drinks
     for drink in read_lines(DRINKS_FILE_PATH):
         drinks.append(drink)
@@ -30,17 +32,27 @@ def load_data(people: list, drinks: list, favourites: dict):
         # https://www.programiz.com/python-programming/methods/string/split
         # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
         name, drink = item.split(":", 1)
-        if name in people and drink in drinks:
-            favourites[name] = drink
-        else:
-            print('Unexpected data returned when loading favourites.')
-            print(f'Drink "{drink}" is known: {drink in drinks}')
-            print(f'Name "{name}" is known: {name in people}')
+        valid = True
+        if name not in [person.name for person in people]:
+            valid = False
+            print(f'{name} is not a known person')
+        if drink not in drinks:
+            valid = False
+            print(f'{drink} is not a known drink')
+        if not valid:
+            continue
+        
+        favourites[name] = drink
+
+
+def save_people(people: List[Person]):
+    data = [person.name for person in people]
+    save_lines(PEOPLE_FILE_PATH, data)
 
 
 def save_data(people: list, drinks: list, favourites: dict):
     # Save people
-    save_lines(PEOPLE_FILE_PATH, people)
+    save_people(people)
     # Save drinks
     save_lines(DRINKS_FILE_PATH, drinks)
     # Save favourites
@@ -62,31 +74,34 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
         clear_screen()
         round.print_order()
         # Set name, drink and finish to the same value, None
-        name = drink = finish = None
-        while not name:
-            name = select_from_menu('\nWhose drink would like to set?', people, clear=False)
-            if name is False:
+        person = drink = finish = None
+        while not person:
+            person = select_person_from_menu(
+                people, '\nWhose drink would like to set?')
+            if not person:
                 print("Please choose a number from the menu")
 
         # If the person has a stored favourite drink add an option to the drinks menu
-        available_drinks = get_available_drinks_for_round(favourites, drinks, name)
+        available_drinks = get_available_drinks_for_round(favourites, drinks, person.name)
 
         while not drink:
-            drink = select_from_menu(
-                f'Please choose a drink for {name}', available_drinks)
-            if drink is False:
+            index = select_from_menu(
+                f'Please choose a drink for {person.name}', available_drinks)
+            if index is False:
                 print("Please choose a number from the menu")
+            drink = drinks[index]
 
         if drink == DRNIKS_MENU_USUAL_OPTION:
-            drink = favourites[name]
-        round.add_to_round(favourites, name, drink=drink)
+            drink = favourites[person.name]
+        round.add_to_round(favourites, person.name, drink=drink)
         clear_screen()
 
         # Ask to add another order with end round option
         while not finish:
             round.print_order()
-            finish = select_from_menu('\nDo you want to add another drink?', ['Yes', 'No'], clear=False)
-            if finish is False:
+            options = ['Yes', 'No']
+            index = select_from_menu('\nDo you want to add another drink?', options, clear=False)
+            if index is False:
                 print("Please choose a number from the menu")
-            if finish == "No":
+            if options[index] == "No":
                 return round

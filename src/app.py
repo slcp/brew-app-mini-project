@@ -6,6 +6,9 @@ from src.core.table import print_table
 from src.core.main import load_data, save_data, build_round
 from src.core.menu import clear_screen, select_from_menu, get_numeric_menu_input
 from src.models.round import Round
+from src.models.person import Person
+from src.core.output import print_people_table
+from src.core.input import select_person_from_menu
 
 # Define data
 # App data
@@ -29,8 +32,8 @@ def handle_exit():
 
 def handle_add_person():
     name = input("What is the name of the user? ")
-    if name not in people:
-        people.append(name)
+    if name not in [person.name for person in people]:
+        people.append(Person(name))
 
 
 def handle_add_drink():
@@ -40,7 +43,7 @@ def handle_add_drink():
 
 
 def handle_get_people():
-    print_table('people', people)
+    print_people_table(people)
 
 
 def handle_get_drinks():
@@ -48,18 +51,19 @@ def handle_get_drinks():
 
 
 def handle_set_favourite_drink():
-    person = select_from_menu('Choose a person', people)
-    if person is False:
+    person = select_person_from_menu(people, 'Choose a person')
+    if not person:
         wait()
         run_menu()
 
-    drink = select_from_menu(f'Choose a drink for {person}', drinks)
-    if drink is False:
+    index = select_from_menu(f'Choose a drink for {person.name}', drinks)
+    if index is False:
         wait()
         run_menu()
+    drink = drinks[index]
 
-    favourite_drinks[person] = drink
-    print(f"\nThank you - {person}'s favourite drink is now {drink}")
+    favourite_drinks[person.name] = drink
+    print(f"\nThank you - {person.name}'s favourite drink is now {drink}")
 
 
 def handle_view_favourites():
@@ -72,16 +76,16 @@ def handle_view_favourites():
 
 def handle_start_round():
     # Whose round is it?
-    name = select_from_menu('Whose round is this?', people)
-    if name is False:
+    person = select_person_from_menu(people, 'Whose round is this?')
+    if not person:
         print("Please choose a number from the menu")
         handle_start_round()
 
     # Create round with owner, get user input to add drinks to the round
-    round = build_round(Round(name), favourite_drinks, people, drinks)
+    round = build_round(Round(person), favourite_drinks, people, drinks)
 
     clear_screen()
-    print(f'Time for you to make some drinks {name}\n')
+    print(f'Time for you to make some drinks {person.name}\n')
     round.print_order()
 
 

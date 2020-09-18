@@ -1,7 +1,8 @@
 from src.core.table import print_table
+from src.models.person import Person
 
 class Round:
-    def __init__(self, brewer, order={}):
+    def __init__(self, brewer: Person, order={}):
         self.order = order
         self.brewer = brewer
 
@@ -12,4 +13,4 @@ class Round:
     def print_order(self):
         content = [f'{name} ordered {drink}' for name,
                    drink in self.order.items()]
-        print_table(f"{self.brewer}'s round", content)
+        print_table(f"{self.brewer.name}'s round", content)

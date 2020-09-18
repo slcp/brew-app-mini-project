@@ -34,7 +34,7 @@ def validate_numeric_menu_input(index: int, data: list):
     if index < 0 or index >= len(data):
         print(f'"{index}" is not a valid option from that menu\n')
         return False
-    return data[index]
+    return index
 
 
 def select_from_menu(message: str, data: list, clear=True):
