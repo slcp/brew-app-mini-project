@@ -8,6 +8,7 @@ from src.constants import (
     DRNIKS_MENU_USUAL_OPTION
 )
 from src.data_store.files import read_lines, save_lines
+from src.data_store.file_store import File_Store
 from src.models.round import Round
 from src.models.person import Person
 from src.core.menu import select_from_menu, clear_screen
@@ -16,14 +17,17 @@ from src.core.input import select_person_from_menu
 
 
 def load_data(people: list, drinks: list, favourites: dict):
+    people_store = File_Store(PEOPLE_FILE_PATH)
+    drinks_store = File_Store(DRINKS_FILE_PATH)
+    favourites_store = File_Store(FAVOURITES_FILE_PATH)
     # Load people
-    for person in read_lines(PEOPLE_FILE_PATH):
+    for person in people_store.read_lines():
         people.append(Person(person))
     # Load drinks
-    for drink in read_lines(DRINKS_FILE_PATH):
+    for drink in drinks_store.read_lines():
         drinks.append(drink)
     # Load favourites
-    for item in read_lines(FAVOURITES_FILE_PATH):
+    for item in favourites_store.read_lines():
         # Unpacking the items in the list to separate variables
         # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
         # I know items.split will return a list with two items, because of the second argument
@@ -41,25 +45,25 @@ def load_data(people: list, drinks: list, favourites: dict):
             print(f'{drink} is not a known drink')
         if not valid:
             continue
-        
+
         favourites[name] = drink
 
 
-def save_people(people: List[Person]):
-    data = [person.name for person in people]
-    save_lines(PEOPLE_FILE_PATH, data)
-
-
 def save_data(people: list, drinks: list, favourites: dict):
+    people_store = File_Store(
+        PEOPLE_FILE_PATH,
+        save_processor=lambda person: person.name)
+    drinks_store = File_Store(DRINKS_FILE_PATH)
+    favourites_store = File_Store(FAVOURITES_FILE_PATH)
     # Save people
-    save_people(people)
+    people_store.save_lines(people)
     # Save drinks
-    save_lines(DRINKS_FILE_PATH, drinks)
+    drinks_store.save_lines(drinks)
     # Save favourites
     # Defining a consistent structure here so that I can parse/recognise it when loading
     # f'{name}:{drink}'
-    save_lines(FAVOURITES_FILE_PATH, [
-               f'{name}:{drink}' for name, drink in favourites.items()])
+    # TODO: Save as a CSV?
+    favourites_store.save_lines([f'{name}:{drink}' for name, drink in favourites.items()])
 
 
 def get_available_drinks_for_round(favourites, drinks, name):
@@ -82,7 +86,8 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
                 print("Please choose a number from the menu")
 
         # If the person has a stored favourite drink add an option to the drinks menu
-        available_drinks = get_available_drinks_for_round(favourites, drinks, person.name)
+        available_drinks = get_available_drinks_for_round(
+            favourites, drinks, person.name)
 
         while not drink:
             index = select_from_menu(
@@ -100,7 +105,8 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
         while not finish:
             round.print_order()
             options = ['Yes', 'No']
-            index = select_from_menu('\nDo you want to add another drink?', options, clear=False)
+            index = select_from_menu(
+                '\nDo you want to add another drink?', options, clear=False)
             if index is False:
                 print("Please choose a number from the menu")
             if options[index] == "No":
