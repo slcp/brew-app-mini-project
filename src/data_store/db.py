@@ -5,11 +5,15 @@ from src.constants import (
 )
 from src.data_store.file_store import File_Store
 from src.models.person import Person
+from src.models.drink import Drink
 
 PERSON_ID_INDEX = 0
 PERSON_FIRST_NAME_INDEX = 1
 PERSON_LAST_NAME_INDEX = 2
 PERSON_DRINK_NAME_INDEX = 3
+
+DRINK_ID_INDEX = 0
+DRINK_NAME_INDEX = 1
 
 class FileDB:
     def __init__(self, people_path, drinks_path, favourites_path):
@@ -35,16 +39,21 @@ class FileDB:
 
     def load_drinks(self):
         data = []
-        for drink in self.drinks_store.read_lines():
-            data.append(drink)
+        for drink in self.drinks_store.read_csv():
+            print('row')
+            data.append(Drink(
+                drink[DRINK_ID_INDEX],
+                drink[DRINK_NAME_INDEX]
+            ))
         return data
 
     def save_drinks(self, drinks):
-        self.drinks_store.save_lines(drinks)
+        self.drinks_store.save_to_csv([[drink.id, drink.name] for drink in drinks])
 
     def load_favourites(self, people, drinks):
         data = {}
         people_names = [person.get_full_name() for person in people]
+        drink_names = [drink.name for drink in drinks]
         for item in self.favourites_store.read_lines():
             # Unpacking the items in the list to separate variables
             # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
@@ -58,7 +67,7 @@ class FileDB:
             if name not in people_names:
                 valid = False
                 print(f'{name} is not a known person')
-            if drink not in drinks:
+            if drink not in drink_names:
                 valid = False
                 print(f'{drink} is not a known drink')
             if not valid:

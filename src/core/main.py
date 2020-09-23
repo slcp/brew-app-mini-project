@@ -6,19 +6,20 @@ from src.constants import (
 )
 from src.models.round import Round
 from src.models.person import Person
+from src.models.drink import Drink
 from src.core.menu import select_from_menu, clear_screen
 from src.core.table import print_table
-from src.core.input import select_person_from_menu
+from src.core.input import select_person_from_menu, select_drink_from_menu
 
 
 def get_available_drinks_for_round(favourites, drinks, name):
     if name in favourites.keys():
-        return drinks + [DRNIKS_MENU_USUAL_OPTION]
+        return drinks + [Drink(0, DRNIKS_MENU_USUAL_OPTION)]
     else:
         return drinks
 
 
-def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[str]):
+def build_round(round: Round, favourites: Dict, people: List[Person], drinks: List[Round]):
     while True:
         clear_screen()
         round.print_order()
@@ -35,13 +36,12 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
             favourites, drinks, person.get_full_name())
 
         while not drink:
-            index = select_from_menu(
-                f'Please choose a drink for {person.get_full_name()}', available_drinks)
-            if index is False:
+            drink = select_drink_from_menu(
+                available_drinks, f'Please choose a drink for {person.get_full_name()}')
+            if not drink:
                 print("Please choose a number from the menu")
-            drink = drinks[index]
 
-        if drink == DRNIKS_MENU_USUAL_OPTION:
+        if drink.name == DRNIKS_MENU_USUAL_OPTION:
             drink = favourites[person.get_full_name()]
         round.add_to_round(favourites, person.get_full_name(), drink=drink)
         clear_screen()

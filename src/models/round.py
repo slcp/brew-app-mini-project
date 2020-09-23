@@ -8,9 +8,9 @@ class Round:
 
     def add_to_round(self, preferences, name, drink=None):
         drink = drink if drink else preferences[name]
-        self.order[name] = drink
+        self.order[name] = drink.name
 
     def print_order(self):
         content = [f'{name} ordered {drink}' for name,
                    drink in self.order.items()]
-        print_table(f"{self.brewer.name}'s round", content)
+        print_table(f"{self.brewer.get_full_name()}'s round", content)

@@ -1,5 +1,5 @@
 # File data sources
-DRINKS_FILE_PATH = './data/drinks.txt'
+DRINKS_FILE_PATH = './data/drinks.csv'
 PEOPLE_FILE_PATH = './data/people.csv'
 FAVOURITES_FILE_PATH = './data/favourites.txt'
 
