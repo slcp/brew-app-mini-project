@@ -6,9 +6,9 @@ class Round:
         self.order = order
         self.brewer = brewer
 
-    def add_to_round(self, preferences, name, drink=None):
-        drink = drink if drink else preferences[name]
-        self.order[name] = drink.name
+    def add_to_round(self, preferences, person, drink=None):
+        drink = drink if drink else preferences[person.id]
+        self.order[person.get_full_name()] = drink.name
 
     def print_order(self):
         content = [f'{name} ordered {drink}' for name,

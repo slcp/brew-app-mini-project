@@ -44,7 +44,7 @@ def build_round(round: Round, favourites: Dict, people: List[Person], drinks: Li
 
         if drink.id == DRNIKS_MENU_USUAL_OPTION:
             drink = [drink for drink in drinks if drink.id == favourites[person.id]][0]
-        round.add_to_round(favourites, person.get_full_name(), drink=drink)
+        round.add_to_round(favourites, person, drink=drink)
         clear_screen()
 
         # Ask to add another order with end round option
