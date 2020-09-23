@@ -22,17 +22,8 @@ PERSON_DRINK_NAME_INDEX = 3
 
 
 def load_data(people: list, drinks: list, favourites: dict):
-    people_store = File_Store(PEOPLE_FILE_PATH)
     drinks_store = File_Store(DRINKS_FILE_PATH)
     favourites_store = File_Store(FAVOURITES_FILE_PATH)
-    # Load people
-    for person_data in people_store.read_csv():
-        people.append(Person(
-            int(person_data[PERSON_ID_INDEX]),
-            person_data[PERSON_FIRST_NAME_INDEX],
-            person_data[PERSON_LAST_NAME_INDEX],
-            person_data[PERSON_DRINK_NAME_INDEX],
-            ))
     # Load drinks
     for drink in drinks_store.read_lines():
         drinks.append(drink)
@@ -59,14 +50,9 @@ def load_data(people: list, drinks: list, favourites: dict):
         favourites[name] = drink
 
 
-def save_data(people: list, drinks: list, favourites: dict):
-    people_store = File_Store(
-        PEOPLE_FILE_PATH,
-        save_processor=lambda person: person.get_full_name())
+def save_data(drinks: list, favourites: dict):
     drinks_store = File_Store(DRINKS_FILE_PATH)
     favourites_store = File_Store(FAVOURITES_FILE_PATH)
-    # Save people
-    people_store.save_to_csv([[person.id, person.first_name, person.last_name, person.drink] for person in people])
     # Save drinks
     drinks_store.save_lines(drinks)
     # Save favourites
@@ -129,7 +115,6 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
 def get_last_id(people: list) -> int:
     last_id = None
     for person in people:
-        print(type(person.id))
         if last_id == None:
             last_id = person.id
             continue
