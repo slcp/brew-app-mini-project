@@ -28,7 +28,7 @@ def load_data(people: list, drinks: list, favourites: dict):
     # Load people
     for person_data in people_store.read_csv():
         people.append(Person(
-            person_data[PERSON_ID_INDEX],
+            int(person_data[PERSON_ID_INDEX]),
             person_data[PERSON_FIRST_NAME_INDEX],
             person_data[PERSON_LAST_NAME_INDEX],
             person_data[PERSON_DRINK_NAME_INDEX],
@@ -123,3 +123,16 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
             if options[index] == "No":
                 return round
             break
+
+
+# Can process a list of any objects with an id property
+def get_last_id(people: list) -> int:
+    last_id = None
+    for person in people:
+        print(type(person.id))
+        if last_id == None:
+            last_id = person.id
+            continue
+        if last_id < person.id:
+            last_id = person.id
+    return last_id
