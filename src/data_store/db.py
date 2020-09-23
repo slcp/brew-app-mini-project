@@ -22,7 +22,7 @@ class FileDB:
         data = []
         for person_data in self.people_store.read_csv():
             data.append(Person(
-                int(person_data[PERSON_ID_INDEX]),
+                person_data[PERSON_ID_INDEX],
                 person_data[PERSON_FIRST_NAME_INDEX],
                 person_data[PERSON_LAST_NAME_INDEX],
                 person_data[PERSON_DRINK_NAME_INDEX],
