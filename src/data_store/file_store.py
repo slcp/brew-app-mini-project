@@ -1,3 +1,5 @@
+import csv
+
 class File_Store:
     def __init__(
             self,
@@ -44,6 +46,28 @@ class File_Store:
                 # There are other ways to this but list comprehension
                 # is an idiomatic use of python
                 file.writelines([f'{self.save_item(item)}\n' for item in data])
+        except FileNotFoundError as e:
+            print(
+                f'File "{self.path}" cannot be found with error: {str(e)} - exiting')
+
+    # data is expected to be a list of lists
+    def save_to_csv(self, data):
+        try:
+            with open(self.path, 'w') as file:
+                writer = csv.writer(file)
+                writer.writerows(data)
+        except FileNotFoundError as e:
+            print(
+                f'File "{self.path}" cannot be found with error: {str(e)} - exiting')
+
+    def read_csv(self):
+        try:
+            with open(self.path, 'r') as file:
+                data = []
+                reader = csv.reader(file, delimiter=',')
+                for row in reader:
+                    data.append(row)
+                return data
         except FileNotFoundError as e:
             print(
                 f'File "{self.path}" cannot be found with error: {str(e)} - exiting')
