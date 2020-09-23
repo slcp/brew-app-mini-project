@@ -11,6 +11,15 @@ def get_last_id(people: list) -> int:
             last_id = person.id
     return last_id
 
+# Functions can return a function - this what is happenening here.
+# When a function being returned uses a variable in the upper scope - db in this case it forms
+# a closure, this means that the function being returned will keep access to the db variable.
+#
+# I am doing this here to give the handler access to the database (db) without my main menu
+# running in src.app having to a) know about my db and b) having to pass it when calling a handler.
+#
+# https://www.programiz.com/python-programming/closure
+# https://www.w3schools.com/python/python_scope.asp
 def make_handle_add_person(db):
     # TODO: Until all handler use a make handler func they need to take one arg as db is
     # passed to all handlers when called

@@ -145,7 +145,7 @@ MENU_TEXT = make_menu(menu_config)
 
 
 # App
-def run_menu(db, handlers=None):
+def run_menu(db, handlers=None): 
     # Enter an infinite loop - the exit option calls exit() which will kill the program
     while True:
         clear_screen()
@@ -183,6 +183,8 @@ def run_menu(db, handlers=None):
 
 def start():
     db = FileDB(PEOPLE_FILE_PATH, DRINKS_FILE_PATH, FAVOURITES_FILE_PATH)
+    # Loop through the menu_config and build call each handler with the db - eventually these will be funcs
+    # that closure over the db and return a handler to be invoked by the menu
     menu_handlers = [{"id": config["menu_option"], "handler": config["handler"](db)} for config in menu_config]
     load_data(db.load_people(), drinks, favourite_drinks)
     run_menu(db, handlers=menu_handlers)
