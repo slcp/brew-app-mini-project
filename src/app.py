@@ -10,13 +10,14 @@ from src.constants import (
     DRNIKS_MENU_USUAL_OPTION
 )
 from src.core.table import print_table
-from src.core.main import load_data, save_data, build_round, get_last_id
+from src.core.main import load_data, save_data, build_round
 from src.core.menu import clear_screen, select_from_menu, get_numeric_menu_input
 from src.models.round import Round
 from src.models.person import Person
 from src.core.output import print_people_table
 from src.core.input import select_person_from_menu
 from src.data_store.db import FileDB
+from src.menu_handlers.add_person import make_handle_add_person
 
 # Define data
 # App data
@@ -104,17 +105,22 @@ def handle_start_round(db):
 
 
 # Menu config
+# Work in progress - a make handler func should return a handler func with a captured DB
+# lambdas fake a make handler func where one has not been implemented yet
 menu_config = [
-    {'menu_option': 1, 'menu_text': 'Get all people', 'handler': handle_get_people},
-    {'menu_option': 2, 'menu_text': 'Get all drinks', 'handler': handle_get_drinks},
-    {'menu_option': 3, 'menu_text': 'Add a person', 'handler': handle_add_person},
-    {'menu_option': 4, 'menu_text': 'Add a drink', 'handler': handle_add_drink},
+    {'menu_option': 1, 'menu_text': 'Get all people', 'handler': lambda x: handle_get_people},
+    {'menu_option': 2, 'menu_text': 'Get all drinks', 'handler': lambda x: handle_get_drinks},
+    {'menu_option': 3, 'menu_text': 'Add a person',
+        'handler': make_handle_add_person},
+    {'menu_option': 4, 'menu_text': 'Add a drink',
+        'handler': lambda x: handle_add_drink},
     {'menu_option': 5, 'menu_text': 'Set a favourite drink',
-        'handler': handle_set_favourite_drink},
+        'handler': lambda x: handle_set_favourite_drink},
     {'menu_option': 6, 'menu_text': 'View favourites',
-        'handler': handle_view_favourites},
-    {'menu_option': 7, 'menu_text': 'Start a round', 'handler': handle_start_round},
-    {'menu_option': 8, 'menu_text': 'Exit', 'handler': handle_exit},
+        'handler': lambda x: handle_view_favourites},
+    {'menu_option': 7, 'menu_text': 'Start a round',
+        'handler': lambda x: handle_start_round},
+    {'menu_option': 8, 'menu_text': 'Exit', 'handler': lambda x: handle_exit},
 ]
 
 
@@ -139,7 +145,7 @@ MENU_TEXT = make_menu(menu_config)
 
 
 # App
-def run_menu(db):
+def run_menu(db, handlers=None):
     # Enter an infinite loop - the exit option calls exit() which will kill the program
     while True:
         clear_screen()
@@ -161,11 +167,11 @@ def run_menu(db):
         # https: // www.programiz.com/python-programming/methods/built-in/next
         # https://docs.python.org/3/library/functions.html#next
         option_config = next(
-            (item for item in menu_config if item.get('menu_option') == option), None)
+            (item for item in handlers if item.get('id') == option), None)
 
         # Handle unknown args
         if option_config is None:
-            print(f'\n"{option}"" is not an option that I recognise')
+            print(f'\n"{option}" is not an option that I recognise')
             wait()
             continue
 
@@ -177,8 +183,9 @@ def run_menu(db):
 
 def start():
     db = FileDB(PEOPLE_FILE_PATH, DRINKS_FILE_PATH, FAVOURITES_FILE_PATH)
+    menu_handlers = [{"id": config["menu_option"], "handler": config["handler"](db)} for config in menu_config]
     load_data(db.load_people(), drinks, favourite_drinks)
-    run_menu(db)
+    run_menu(db, handlers=menu_handlers)
 
 
 # When this file is run from terminal/cli  as a module __name__ is set to "__main__"

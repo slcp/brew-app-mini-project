@@ -15,11 +15,6 @@ from src.core.menu import select_from_menu, clear_screen
 from src.core.table import print_table
 from src.core.input import select_person_from_menu
 
-PERSON_ID_INDEX = 0
-PERSON_FIRST_NAME_INDEX = 1
-PERSON_LAST_NAME_INDEX = 2
-PERSON_DRINK_NAME_INDEX = 3
-
 
 def load_data(people: list, drinks: list, favourites: dict):
     drinks_store = File_Store(DRINKS_FILE_PATH)
@@ -109,15 +104,3 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
             if options[index] == "No":
                 return round
             break
-
-
-# Can process a list of any objects with an id property
-def get_last_id(people: list) -> int:
-    last_id = None
-    for person in people:
-        if last_id == None:
-            last_id = person.id
-            continue
-        if last_id < person.id:
-            last_id = person.id
-    return last_id
