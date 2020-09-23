@@ -2,59 +2,13 @@ import os
 from typing import Dict, List
 
 from src.constants import (
-    DRINKS_FILE_PATH,
-    PEOPLE_FILE_PATH,
-    FAVOURITES_FILE_PATH,
     DRNIKS_MENU_USUAL_OPTION
 )
-from src.data_store.files import read_lines, save_lines
-from src.data_store.file_store import File_Store
 from src.models.round import Round
 from src.models.person import Person
 from src.core.menu import select_from_menu, clear_screen
 from src.core.table import print_table
 from src.core.input import select_person_from_menu
-
-
-def load_data(people: list, drinks: list, favourites: dict):
-    drinks_store = File_Store(DRINKS_FILE_PATH)
-    favourites_store = File_Store(FAVOURITES_FILE_PATH)
-    # Load drinks
-    for drink in drinks_store.read_lines():
-        drinks.append(drink)
-    # Load favourites
-    for item in favourites_store.read_lines():
-        # Unpacking the items in the list to separate variables
-        # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
-        # I know items.split will return a list with two items, because of the second argument
-        # it will only split once even if there are more instances of ':' in the string
-        #
-        # https://www.programiz.com/python-programming/methods/string/split
-        # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
-        name, drink = item.split(":", 1)
-        valid = True
-        if name not in [person.get_full_name() for person in people]:
-            valid = False
-            print(f'{name} is not a known person')
-        if drink not in drinks:
-            valid = False
-            print(f'{drink} is not a known drink')
-        if not valid:
-            continue
-
-        favourites[name] = drink
-
-
-def save_data(drinks: list, favourites: dict):
-    drinks_store = File_Store(DRINKS_FILE_PATH)
-    favourites_store = File_Store(FAVOURITES_FILE_PATH)
-    # Save drinks
-    drinks_store.save_lines(drinks)
-    # Save favourites
-    # Defining a consistent structure here so that I can parse/recognise it when loading
-    # f'{name}:{drink}'
-    # TODO: Save as a CSV?
-    favourites_store.save_lines([f'{name}:{drink}' for name, drink in favourites.items()])
 
 
 def get_available_drinks_for_round(favourites, drinks, name):

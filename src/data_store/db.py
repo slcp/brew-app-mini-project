@@ -39,6 +39,9 @@ class FileDB:
             data.append(drink)
         return data
 
+    def save_drinks(self, drinks):
+        self.drinks_store.save_lines(drinks)
+
     def load_favourites(self, people, drinks):
         data = {}
         people_names = [person.get_full_name() for person in people]
@@ -62,3 +65,11 @@ class FileDB:
                 continue
             data[name] = drink
         return data
+
+    def save_favourites(self, favourites):
+        # Save favourites
+        # Defining a consistent structure here so that I can parse/recognise it when loading
+        # f'{name}:{drink}'
+        # TODO: Save as a CSV?
+        self.favourites_store.save_lines(
+            [f'{name}:{drink}' for name, drink in favourites.items()])

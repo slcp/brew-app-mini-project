@@ -10,7 +10,7 @@ from src.constants import (
     DRNIKS_MENU_USUAL_OPTION
 )
 from src.core.table import print_table
-from src.core.main import load_data, save_data, build_round
+from src.core.main import build_round
 from src.core.menu import clear_screen, select_from_menu, get_numeric_menu_input
 from src.models.round import Round
 from src.models.person import Person
@@ -18,13 +18,6 @@ from src.core.output import print_people_table
 from src.core.input import select_person_from_menu
 from src.data_store.db import FileDB
 from src.menu_handlers.add_person import make_handle_add_person
-
-# Define data
-# App data
-drinks = []
-people = []
-favourite_drinks = {}
-
 
 # Input helper funcs
 def wait():
@@ -34,26 +27,16 @@ def wait():
 # Menu handlers
 def handle_exit(db):
     print('Saving data...')
-    save_data(drinks, favourite_drinks)
     print(f'Thank you for using {APP_NAME}')
     exit()
 
 
-def handle_add_person(db):
-    name = input("What is the name of the user? ")
-    parts = name.split(" ", maxsplit=1)
-    first_name = parts[0]
-    last_name = None if len(parts) != 2 else parts[1]
-    people = db.load_people()
-    last_id = get_last_id(people)
-    people.append(Person(last_id + 1, first_name, last_name, None))
-    db.save_people(people)
-
-
 def handle_add_drink(db):
+    drinks = db.load_drinks()
     drink = input("What is the name of the drink? ")
     if drink not in drinks:
         drinks.append(drink)
+    db.save_drinks(drinks)
 
 
 def handle_get_people(db):
@@ -62,11 +45,14 @@ def handle_get_people(db):
 
 
 def handle_get_drinks(db):
+    drinks = db.load_drinks()
     print_table('drinks', drinks)
 
 
 def handle_set_favourite_drink(db):
     people = db.load_people()
+    drinks = db.load_drinks()
+    favourite_drinks = db.load_favourites(people, drinks)
     person = select_person_from_menu(people, 'Choose a person')
     if not person:
         return
@@ -77,10 +63,14 @@ def handle_set_favourite_drink(db):
     drink = drinks[index]
 
     favourite_drinks[person.get_full_name()] = drink
+    db.save_favourites(favourite_drinks)
     print(f"\nThank you - {person.get_full_name()}'s favourite drink is now {drink}")
 
 
 def handle_view_favourites(db):
+    people = db.load_people()
+    drinks = db.load_drinks()
+    favourite_drinks = db.load_favourites(people, drinks)
     # Using list comprehension to loop through favourites dictionary (dict.items())
     # Using tuple unpacking to dict (key, value) pairs into separate name, drink variables
     # Creating a list where each item is the result of f'{name}: {drink}'
@@ -90,6 +80,8 @@ def handle_view_favourites(db):
 
 def handle_start_round(db):
     people = db.load_people()
+    drinks = db.load_drinks()
+    favourite_drinks = db.load_favourites(people, drinks)
     # Whose round is it?
     person = select_person_from_menu(people, 'Whose round is this?')
     if not person:
@@ -186,7 +178,6 @@ def start():
     # Loop through the menu_config and build call each handler with the db - eventually these will be funcs
     # that closure over the db and return a handler to be invoked by the menu
     menu_handlers = [{"id": config["menu_option"], "handler": config["handler"](db)} for config in menu_config]
-    load_data(db.load_people(), drinks, favourite_drinks)
     run_menu(db, handlers=menu_handlers)
 
 

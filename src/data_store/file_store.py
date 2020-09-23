@@ -60,6 +60,7 @@ class File_Store:
             print(
                 f'File "{self.path}" cannot be found with error: {str(e)} - exiting')
 
+    # Returns list of lists
     def read_csv(self):
         try:
             with open(self.path, 'r') as file:
