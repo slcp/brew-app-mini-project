@@ -32,8 +32,8 @@ def handle_exit():
 
 def handle_add_person():
     name = input("What is the name of the user? ")
-    if name not in [person.name for person in people]:
-        people.append(Person(name))
+    if name not in [person.get_full_name() for person in people]:
+        people.append(Person(0, name, "second name", "drink"))
 
 
 def handle_add_drink():
@@ -55,13 +55,13 @@ def handle_set_favourite_drink():
     if not person:
         return
 
-    index = select_from_menu(f'Choose a drink for {person.name}', drinks)
+    index = select_from_menu(f'Choose a drink for {person.get_full_name()}', drinks)
     if index is False:
         return
     drink = drinks[index]
 
-    favourite_drinks[person.name] = drink
-    print(f"\nThank you - {person.name}'s favourite drink is now {drink}")
+    favourite_drinks[person.get_full_name()] = drink
+    print(f"\nThank you - {person.get_full_name()}'s favourite drink is now {drink}")
 
 
 def handle_view_favourites():
@@ -83,7 +83,7 @@ def handle_start_round():
     round = build_round(Round(person), favourite_drinks, people, drinks)
 
     clear_screen()
-    print(f'Time for you to make some drinks {person.name}\n')
+    print(f'Time for you to make some drinks {person.get_full_name()}\n')
     round.print_order()
 
 

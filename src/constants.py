@@ -1,6 +1,6 @@
 # File data sources
 DRINKS_FILE_PATH = './data/drinks.txt'
-PEOPLE_FILE_PATH = './data/people.txt'
+PEOPLE_FILE_PATH = './data/people.csv'
 FAVOURITES_FILE_PATH = './data/favourites.txt'
 
 # App details

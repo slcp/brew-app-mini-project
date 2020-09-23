@@ -15,7 +15,7 @@ class Test_Select_Person_From_Menu(unittest.TestCase):
     def test_when_number_is_returned_from_select_return_the_person_at_that_position(self, mock_select_from_menu):
         # Arrange
         person = Mock(Person)
-        person.name = "Stuart"
+        person.first_name = "Stuart"
         people = [person]
         mock_select_from_menu.return_value = 0
         
@@ -29,7 +29,7 @@ class Test_Select_Person_From_Menu(unittest.TestCase):
     def test_when_false_is_returned_from_select_menu_return_none(self, mock_select_from_menu):
         # Arrange
         person = Mock(Person)
-        person.name = "Stuart"
+        person.first_name = "Stuart"
         people = [person]
         mock_select_from_menu.return_value = False
 

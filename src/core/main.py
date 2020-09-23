@@ -15,14 +15,24 @@ from src.core.menu import select_from_menu, clear_screen
 from src.core.table import print_table
 from src.core.input import select_person_from_menu
 
+PERSON_ID_INDEX = 0
+PERSON_FIRST_NAME_INDEX = 1
+PERSON_LAST_NAME_INDEX = 2
+PERSON_DRINK_NAME_INDEX = 3
+
 
 def load_data(people: list, drinks: list, favourites: dict):
     people_store = File_Store(PEOPLE_FILE_PATH)
     drinks_store = File_Store(DRINKS_FILE_PATH)
     favourites_store = File_Store(FAVOURITES_FILE_PATH)
     # Load people
-    for person in people_store.read_lines():
-        people.append(Person(person))
+    for person_data in people_store.read_csv():
+        people.append(Person(
+            person_data[PERSON_ID_INDEX],
+            person_data[PERSON_FIRST_NAME_INDEX],
+            person_data[PERSON_LAST_NAME_INDEX],
+            person_data[PERSON_DRINK_NAME_INDEX],
+            ))
     # Load drinks
     for drink in drinks_store.read_lines():
         drinks.append(drink)
@@ -37,7 +47,7 @@ def load_data(people: list, drinks: list, favourites: dict):
         # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
         name, drink = item.split(":", 1)
         valid = True
-        if name not in [person.name for person in people]:
+        if name not in [person.get_full_name() for person in people]:
             valid = False
             print(f'{name} is not a known person')
         if drink not in drinks:
@@ -52,11 +62,11 @@ def load_data(people: list, drinks: list, favourites: dict):
 def save_data(people: list, drinks: list, favourites: dict):
     people_store = File_Store(
         PEOPLE_FILE_PATH,
-        save_processor=lambda person: person.name)
+        save_processor=lambda person: person.get_full_name())
     drinks_store = File_Store(DRINKS_FILE_PATH)
     favourites_store = File_Store(FAVOURITES_FILE_PATH)
     # Save people
-    people_store.save_lines(people)
+    people_store.save_to_csv([[person.id, person.first_name, person.last_name, person.drink] for person in people])
     # Save drinks
     drinks_store.save_lines(drinks)
     # Save favourites
@@ -87,18 +97,18 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
 
         # If the person has a stored favourite drink add an option to the drinks menu
         available_drinks = get_available_drinks_for_round(
-            favourites, drinks, person.name)
+            favourites, drinks, person.get_full_name())
 
         while not drink:
             index = select_from_menu(
-                f'Please choose a drink for {person.name}', available_drinks)
+                f'Please choose a drink for {person.get_full_name()}', available_drinks)
             if index is False:
                 print("Please choose a number from the menu")
             drink = drinks[index]
 
         if drink == DRNIKS_MENU_USUAL_OPTION:
-            drink = favourites[person.name]
-        round.add_to_round(favourites, person.name, drink=drink)
+            drink = favourites[person.get_full_name()]
+        round.add_to_round(favourites, person.get_full_name(), drink=drink)
         clear_screen()
 
         # Ask to add another order with end round option
@@ -109,5 +119,7 @@ def build_round(round: Round, favourites: Dict, people: List[str], drinks: List[
                 '\nDo you want to add another drink?', options, clear=False)
             if index is False:
                 print("Please choose a number from the menu")
+                continue
             if options[index] == "No":
                 return round
+            break
