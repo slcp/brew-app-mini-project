@@ -1,4 +1,4 @@
-from src.core.table import print_table
+from src.core.output import print_favourites_table
 
 def make_handle_view_favourites(db):
     def handler():
@@ -8,6 +8,5 @@ def make_handle_view_favourites(db):
         # Using list comprehension to loop through favourites dictionary (dict.items())
         # Using tuple unpacking to dict (key, value) pairs into separate name, drink variables
         # Creating a list where each item is the result of f'{name}: {drink}'
-        print_table('Favourites', [
-                    f'{name}: {drink}' for name, drink in favourite_drinks.items()])
+        print_favourites_table(favourite_drinks, people, drinks)
     return handler

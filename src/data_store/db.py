@@ -52,8 +52,8 @@ class FileDB:
 
     def load_favourites(self, people, drinks):
         data = {}
-        people_names = [person.get_full_name() for person in people]
-        drink_names = [drink.name for drink in drinks]
+        people_ids = [person.id for person in people]
+        drink_ids = [drink.id for drink in drinks]
         for item in self.favourites_store.read_lines():
             # Unpacking the items in the list to separate variables
             # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
@@ -62,17 +62,17 @@ class FileDB:
             #
             # https://www.programiz.com/python-programming/methods/string/split
             # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
-            name, drink = item.split(":", 1)
+            person_id, drink_id = item.split(":", 1)
             valid = True
-            if name not in people_names:
+            if person_id not in people_ids:
                 valid = False
-                print(f'{name} is not a known person')
-            if drink not in drink_names:
+                print(f'{person_id} is not a known person')
+            if drink_id not in drink_ids:
                 valid = False
-                print(f'{drink} is not a known drink')
+                print(f'{drink_id} is not a known drink')
             if not valid:
                 continue
-            data[name] = drink
+            data[person_id] = drink_id
         return data
 
     def save_favourites(self, favourites):
@@ -81,4 +81,4 @@ class FileDB:
         # f'{name}:{drink}'
         # TODO: Save as a CSV?
         self.favourites_store.save_lines(
-            [f'{name}:{drink}' for name, drink in favourites.items()])
+            [f'{person_id}:{drink_id}' for person_id, drink_id in favourites.items()])

@@ -23,3 +23,10 @@ def print_drinks_table(drinks: List[Drink]):
 def print_drinks_menu(drinks: List[Drink]):
     data = [drink.name for drink in drinks]
     print_menu('drinks', data)
+
+
+def print_favourites_table(favourites: dict, people: List[Person], drinks: List[Drink]):
+    people_dict = {person.id:person for person in people}
+    drink_dict = {drink.id:drink for drink in drinks}
+    print_table('Favourites', [
+        f'{people_dict[person_id].get_full_name()}: {drink_dict[drink_id].name}' for person_id, drink_id in favourites.items()])

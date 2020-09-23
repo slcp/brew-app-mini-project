@@ -12,9 +12,10 @@ from src.core.table import print_table
 from src.core.input import select_person_from_menu, select_drink_from_menu
 
 
-def get_available_drinks_for_round(favourites, drinks, name):
-    if name in favourites.keys():
-        return drinks + [Drink(0, DRNIKS_MENU_USUAL_OPTION)]
+def get_available_drinks_for_round(favourites, drinks, person):
+    if person.id in favourites.keys():
+        # This is a bit nasty but we need to a list of drinks
+        return drinks + [Drink(DRNIKS_MENU_USUAL_OPTION, DRNIKS_MENU_USUAL_OPTION)]
     else:
         return drinks
 
@@ -33,7 +34,7 @@ def build_round(round: Round, favourites: Dict, people: List[Person], drinks: Li
 
         # If the person has a stored favourite drink add an option to the drinks menu
         available_drinks = get_available_drinks_for_round(
-            favourites, drinks, person.get_full_name())
+            favourites, drinks, person)
 
         while not drink:
             drink = select_drink_from_menu(
@@ -41,8 +42,8 @@ def build_round(round: Round, favourites: Dict, people: List[Person], drinks: Li
             if not drink:
                 print("Please choose a number from the menu")
 
-        if drink.name == DRNIKS_MENU_USUAL_OPTION:
-            drink = favourites[person.get_full_name()]
+        if drink.id == DRNIKS_MENU_USUAL_OPTION:
+            drink = [drink for drink in drinks if drink.id == favourites[person.id]][0]
         round.add_to_round(favourites, person.get_full_name(), drink=drink)
         clear_screen()
 
