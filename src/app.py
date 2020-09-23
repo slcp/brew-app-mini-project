@@ -3,7 +3,7 @@ from typing import List
 
 from src.constants import APP_NAME, VERSION, DRNIKS_MENU_USUAL_OPTION
 from src.core.table import print_table
-from src.core.main import load_data, save_data, build_round
+from src.core.main import load_data, save_data, build_round, get_last_id
 from src.core.menu import clear_screen, select_from_menu, get_numeric_menu_input
 from src.models.round import Round
 from src.models.person import Person
@@ -32,8 +32,11 @@ def handle_exit():
 
 def handle_add_person():
     name = input("What is the name of the user? ")
-    if name not in [person.get_full_name() for person in people]:
-        people.append(Person(0, name, "second name", "drink"))
+    parts = name.split(" ", maxsplit=1)
+    first_name = parts[0]
+    last_name = None if len(parts) != 2 else parts[1] 
+    last_id = get_last_id(people)
+    people.append(Person(last_id + 1, first_name, last_name, None))
 
 
 def handle_add_drink():
