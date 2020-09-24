@@ -37,7 +37,7 @@ class Test_Select_Person_From_Menu(unittest.TestCase):
         actual = select_person_from_menu(people)
 
         # Assert
-        self.assertFalse(actual)
+        self.assertEqual(actual, None)
 
 
 # provides a command-line interface to the test script
