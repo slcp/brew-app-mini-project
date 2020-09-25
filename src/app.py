@@ -127,7 +127,9 @@ def start():
 # When this file is run from terminal/cli  as a module __name__ is set to "__main__"
 # eg. python -m src.app
 # When the file is imported (eg. import app) __name__ is NOT set to "__main__"
-#
+# fbgdbgbgf
 # Great resource explaining Python modules/packages - https://alex.dzyoba.com/blog/python-import/
 if __name__ == "__main__":
     start()
+
+# This was made on test-branch
