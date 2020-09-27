@@ -1,5 +1,7 @@
 astroid==2.4.2
+atomicwrites==1.4.0
 attrs==20.2.0
+colorama==0.4.3
 iniconfig==1.0.1
 isort==5.5.2
 lazy-object-proxy==1.4.3
