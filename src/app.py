@@ -96,7 +96,7 @@ def run_menu(handlers=None):
         #
         # next(list, default_value) - get the next/first item in the list, or None if it is empty
         #
-        # https: // www.programiz.com/python-programming/methods/built-in/next
+        # https://www.programiz.com/python-programming/methods/built-in/next
         # https://docs.python.org/3/library/functions.html#next
         option_config = next(
             (item for item in handlers if item.get('id') == option), None)
