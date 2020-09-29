@@ -16,7 +16,7 @@ from src.models.round import Round
 from src.models.person import Person
 from src.core.output import print_people_table
 from src.core.input import select_person_from_menu
-from src.data_store.db import FileDB
+from src.data_store.file_db import FileDB
 from src.menu_handlers.add_person import make_handle_add_person
 from src.menu_handlers.add_drink import make_handle_add_drink
 from src.menu_handlers.print_people import make_handle_get_people
@@ -115,8 +115,9 @@ def run_menu(handlers=None):
 
 def start():
     db = FileDB(PEOPLE_FILE_PATH, DRINKS_FILE_PATH, FAVOURITES_FILE_PATH)
-    # Loop through the menu_config and build call each handler with the db - eventually these will be funcs
-    # that closure over the db and return a handler to be invoked by the menu
+    # Loop through the menu_config and call each handler with the db, these are funcs
+    # that closure over the db and return a handler to be invoked by the menu.
+    # See src.menu_handlers for notes about closures
     menu_handlers = [{
             "id": config["menu_option"],
             "handler": config["handler"](db)
@@ -127,9 +128,6 @@ def start():
 # When this file is run from terminal/cli  as a module __name__ is set to "__main__"
 # eg. python -m src.app
 # When the file is imported (eg. import app) __name__ is NOT set to "__main__"
-# fbgdbgbgf
 # Great resource explaining Python modules/packages - https://alex.dzyoba.com/blog/python-import/
 if __name__ == "__main__":
     start()
-
-# This was made on test-branch
