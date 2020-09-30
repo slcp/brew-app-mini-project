@@ -9,6 +9,20 @@ services:
       MYSQL_ROOT_PASSWORD: "${mysql_pass}"
     ports:
       - "33066:3306"
+  app:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VARIANT: "3.8"
+    # It is our responsibility to mount our app into the container when using docker-compose
+    # with VSCode Dev Containers
+    volumes: 
+      - ./:/brew-project
+    # It is our responsibility to keep the container running when using docker-compose
+    # with VSCode Dev Containers
+    command: tail -F anything
   adminer:
     image: adminer
     container_name: adminer_container
