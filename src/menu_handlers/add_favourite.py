@@ -1,12 +1,13 @@
 from src.core.input import select_person_from_menu, select_drink_from_menu
 from src.core.menu import select_from_menu
 
-def make_handle_set_favourite_drink(db):
+
+def make_handle_set_favourite_drink(file_db, sql_db):
     def handler():
-        people = db.load_people()
-        drinks = db.load_drinks()
-        favourite_drinks = db.load_favourites(people, drinks)
-        
+        people = sql_db.load_people()
+        drinks = file_db.load_drinks()
+        favourite_drinks = file_db.load_favourites(people, drinks)
+
         person = select_person_from_menu(people, 'Choose a person')
         if not person:
             return
@@ -17,7 +18,7 @@ def make_handle_set_favourite_drink(db):
             return
 
         favourite_drinks[person.id] = drink.id
-        db.save_favourites(favourite_drinks)
+        file_db.save_favourites(favourite_drinks)
         print(
             f"\nThank you - {person.get_full_name()}'s favourite drink is now {drink.name}")
     return handler

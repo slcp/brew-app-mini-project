@@ -21,7 +21,9 @@ def get_last_id(people: list) -> int:
 #
 # https://www.programiz.com/python-programming/closure
 # https://www.w3schools.com/python/python_scope.asp
-def make_handle_add_person(db):
+
+
+def make_handle_add_person(file_db, sql_db):
     # TODO: Until all handler use a make handler func they need to take one arg as db is
     # passed to all handlers when called
     def handler():
@@ -29,9 +31,8 @@ def make_handle_add_person(db):
         parts = name.split(" ", maxsplit=1)
         first_name = parts[0]
         last_name = None if len(parts) != 2 else parts[1]
-        people = db.load_people()
-        people.append(Person(uuid.uuid1(), first_name, last_name, None))
-        db.save_people(people)
+        person = Person(uuid.uuid1(), first_name, last_name, None)
+        sql_db.insert_person(person)
     return handler
 
 

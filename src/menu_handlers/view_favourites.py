@@ -1,12 +1,10 @@
 from src.core.output import print_favourites_table
 
-def make_handle_view_favourites(db):
+
+def make_handle_view_favourites(file_db, sql_db):
     def handler():
-        people = db.load_people()
-        drinks = db.load_drinks()
-        favourite_drinks = db.load_favourites(people, drinks)
-        # Using list comprehension to loop through favourites dictionary (dict.items())
-        # Using tuple unpacking to dict (key, value) pairs into separate name, drink variables
-        # Creating a list where each item is the result of f'{name}: {drink}'
+        people = sql_db.load_people()
+        drinks = file_db.load_drinks()
+        favourite_drinks = sql_db.load_favourites(people, drinks)
         print_favourites_table(favourite_drinks, people, drinks)
     return handler

@@ -64,7 +64,7 @@ menu_config = [
         'handler': make_handle_view_favourites},
     {'menu_option': 7, 'menu_text': 'Start a round',
         'handler': make_handle_start_round},
-    {'menu_option': 8, 'menu_text': 'Exit', 'handler': lambda x: handle_exit},
+    {'menu_option': 8, 'menu_text': 'Exit', 'handler': lambda x, y: handle_exit},
 ]
 
 
@@ -126,17 +126,15 @@ def run_menu(handlers=None):
 
 
 def start():
-    # db = FileDB(PEOPLE_FILE_PATH, DRINKS_FILE_PATH, FAVOURITES_FILE_PATH)
-    print(MYSQL_PORT)
-    # input()
-    db = MySQLDB(db_name=MYSQL_DB, user=MYSQL_USER,
+    file_db = FileDB(PEOPLE_FILE_PATH, DRINKS_FILE_PATH, FAVOURITES_FILE_PATH)
+    sql_db = MySQLDB(db_name=MYSQL_DB, user=MYSQL_USER,
                   password=MYSQL_PASS, host=MYSQL_HOST, port=MYSQL_PORT)
     # Loop through the menu_config and call each handler with the db, these are funcs
     # that closure over the db and return a handler to be invoked by the menu.
     # See src.menu_handlers for notes about closures
     menu_handlers = [{
         "id": config["menu_option"],
-        "handler": config["handler"](db)
+        "handler": config["handler"](file_db, sql_db)
     } for config in menu_config]
     run_menu(handlers=menu_handlers)
 
