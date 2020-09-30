@@ -14,6 +14,13 @@ PERSON_FIRST_NAME_INDEX = 1
 PERSON_LAST_NAME_INDEX = 2
 PERSON_DRINK_NAME_INDEX = 3
 
+PERSON_TABLE = "person"
+
+PERSON_ID_COLUMN = "person_id"
+PERSON_FIRST_NAME_COLUMN = "first_name"
+PERSON_LAST_NAME_COLUMN = "surname"
+PERSON_AGE_COLUMN = "age"
+
 DRINK_ID_INDEX = 0
 DRINK_NAME_INDEX = 1
 
@@ -39,24 +46,34 @@ class MySQLDB:
         try:
             with connection.cursor() as cursor:
                 # Create a new record
-                sql = "SELECT * FROM person"
+                sql = f'SELECT * FROM {PERSON_TABLE}'
                 cursor.execute(sql)
-                print(cursor.fetchall())
+                while True:
+                    person_data = cursor.fetchone()
+                    if not person_data:
+                        break
+                    data.append(Person(
+                                person_data[PERSON_ID_INDEX],
+                                person_data[PERSON_FIRST_NAME_INDEX],
+                                person_data[PERSON_LAST_NAME_INDEX],
+                                person_data[PERSON_DRINK_NAME_INDEX],
+                                ))
             connection.commit()
         finally:
             connection.close()
-        # for person_data in self.people_store.read_csv():
-        #     data.append(Person(
-        #         person_data[PERSON_ID_INDEX],
-        #         person_data[PERSON_FIRST_NAME_INDEX],
-        #         person_data[PERSON_LAST_NAME_INDEX],
-        #         person_data[PERSON_DRINK_NAME_INDEX],
-        #     ))
         return data
 
-    def save_people(self, people):
-        self.people_store.save_to_csv(
-            [[person.id, person.first_name, person.last_name, person.drink] for person in people])
+    def insert_person(self, person):
+        connection = self.__make_connection()
+        try:
+            with connection.cursor() as cursor:
+                data = [str(person.id), person.first_name,
+                        person.last_name, person.age]
+                sql = f'INSERT INTO {PERSON_TABLE} ({PERSON_ID_COLUMN}, {PERSON_FIRST_NAME_COLUMN}, {PERSON_LAST_NAME_COLUMN}, {PERSON_AGE_COLUMN}) VALUES (%s, %s, %s, %s)'
+                cursor.execute(sql, [*data])
+                connection.commit()
+        finally:
+            connection.close()
 
     def load_drinks(self):
         data = []
