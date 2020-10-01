@@ -45,7 +45,6 @@ class MySQLDB:
         connection = self.__make_connection()
         try:
             with connection.cursor() as cursor:
-                # Create a new record
                 sql = f'SELECT * FROM {PERSON_TABLE}'
                 cursor.execute(sql)
                 while True:
@@ -69,55 +68,9 @@ class MySQLDB:
             with connection.cursor() as cursor:
                 data = [str(person.id), person.first_name,
                         person.last_name, person.age]
-                sql = f'INSERT INTO {PERSON_TABLE} ({PERSON_ID_COLUMN}, {PERSON_FIRST_NAME_COLUMN}, {PERSON_LAST_NAME_COLUMN}, {PERSON_AGE_COLUMN}) VALUES (%s, %s, %s, %s)'
+                sql = f'INSERT INTO {PERSON_TABLE} ({PERSON_ID_COLUMN}, {PERSON_FIRST_NAME_COLUMN}, \
+                    {PERSON_LAST_NAME_COLUMN}, {PERSON_AGE_COLUMN}) VALUES (%s, %s, %s, %s)'
                 cursor.execute(sql, [*data])
                 connection.commit()
         finally:
             connection.close()
-
-    def load_drinks(self):
-        data = []
-        for drink in self.drinks_store.read_csv():
-            print('row')
-            data.append(Drink(
-                drink[DRINK_ID_INDEX],
-                drink[DRINK_NAME_INDEX]
-            ))
-        return data
-
-    def save_drinks(self, drinks):
-        self.drinks_store.save_to_csv(
-            [[drink.id, drink.name] for drink in drinks])
-
-    def load_favourites(self, people, drinks):
-        data = {}
-        people_ids = [person.id for person in people]
-        drink_ids = [drink.id for drink in drinks]
-        for item in self.favourites_store.read_lines():
-            # Unpacking the items in the list to separate variables
-            # https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
-            # I know items.split will return a list with two items, because of the second argument
-            # it will only split once even if there are more instances of ':' in the string
-            #
-            # https://www.programiz.com/python-programming/methods/string/split
-            # https://docs.python.org/3/library/stdtypes.html?highlight=split#str.rsplit
-            person_id, drink_id = item.split(":", 1)
-            valid = True
-            if person_id not in people_ids:
-                valid = False
-                print(f'{person_id} is not a known person')
-            if drink_id not in drink_ids:
-                valid = False
-                print(f'{drink_id} is not a known drink')
-            if not valid:
-                continue
-            data[person_id] = drink_id
-        return data
-
-    def save_favourites(self, favourites):
-        # Save favourites
-        # Defining a consistent structure here so that I can parse/recognise it when loading
-        # f'{name}:{drink}'
-        # TODO: Save as a CSV?
-        self.favourites_store.save_lines(
-            [f'{person_id}:{drink_id}' for person_id, drink_id in favourites.items()])
