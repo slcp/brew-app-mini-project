@@ -79,14 +79,12 @@ class MySQLDB:
 
     def insert_drink(self, drink):
         connection = self.__make_connection()
+        print('doing stuff')
         try:
             with connection.cursor() as cursor:
-                data = [drink.id, drink.name]
+                data = [str(drink.id), drink.name]
                 sql = 'INSERT INTO drink (id, name) VALUES (%s, %s)'
                 cursor.execute(sql, data)
                 connection.commit()
-        except:
-             # Handle error
-             pass
         finally:
             connection.close()
