@@ -40,7 +40,6 @@ class FileDB:
     def load_drinks(self):
         data = []
         for drink in self.drinks_store.read_csv():
-            print('row')
             data.append(Drink(
                 drink[DRINK_ID_INDEX],
                 drink[DRINK_NAME_INDEX]

@@ -75,7 +75,6 @@ class MySQLDB:
         finally:
             connection.close()
 
-    # Save drinks - match input/output to save to file drinks function
 
     def insert_drink(self, drink):
         connection = self.__make_connection()
@@ -88,3 +87,21 @@ class MySQLDB:
                 connection.commit()
         finally:
             connection.close()
+
+    # Load drinks - match input/output to save to file drinks function
+    def load_drinks(self):
+        data = []
+        connection = self.__make_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = 'SELECT * from drink'
+                cursor.execute(sql)
+                while True:
+                    drink_data = cursor.fetchone()
+                    if not drink_data:
+                        break
+                    data.append(Drink(drink_data[0], drink_data[1]))
+                connection.commit()
+        finally:
+            connection.close()
+        return data
