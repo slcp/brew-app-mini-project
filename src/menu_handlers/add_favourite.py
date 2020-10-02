@@ -5,7 +5,7 @@ from src.core.menu import select_from_menu
 def make_handle_set_favourite_drink(file_db, sql_db):
     def handler():
         people = sql_db.load_people()
-        drinks = file_db.load_drinks()
+        drinks = sql_db.load_drinks()
         favourite_drinks = file_db.load_favourites(people, drinks)
 
         person = select_person_from_menu(people, 'Choose a person')

@@ -7,7 +7,7 @@ from src.core.menu import clear_screen
 def make_handle_start_round(file_db, sql_db):
     def handler():
         people = sql_db.load_people()
-        drinks = file_db.load_drinks()
+        drinks = sql_db.load_drinks()
         favourite_drinks = file_db.load_favourites(people, drinks)
         # Whose round is it?
         person = select_person_from_menu(people, 'Whose round is this?')
