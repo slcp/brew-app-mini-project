@@ -3,6 +3,7 @@
 
 # venv
 .venv
+.vvvvv
 
 # python
 __pycache__
